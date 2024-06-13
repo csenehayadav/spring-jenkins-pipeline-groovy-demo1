@@ -1,7 +1,5 @@
 pipeline {
     agent any
-    
-   
 
     tools {
         // Install the Maven version configured as "M3" and add it to the path.
@@ -15,81 +13,67 @@ pipeline {
                 git url: 'https://github.com/csenehayadav/spring-jenkins-pipeline-groovy-demo1.git'
 
                 // Run Maven on a Unix agent.
-                script{
-                if(isUnix()){
-                sh "mvn -Dmaven.test.failure.ignore=true clean package"
-				}	
-                else{
-                 bat "mvn -Dmaven.test.failure.ignore=true clean package"
-                 }
-                 }
+                script {
+                    if (isUnix()) {
+                        sh "mvn -Dmaven.test.failure.ignore=true clean package"
+                    } else {
+                        bat "mvn -Dmaven.test.failure.ignore=true clean package"
+                    }
+                }
             }
-            }
-    }
-            
-           
-           
+        }
+
         stage('Integration Test') {
             steps {
-               
                 // Run Maven on a Unix agent.
-                script{
-                if(isUnix()){
-                sh "mvn -Dmaven.test.failure.ignore=true clean verify"
-				}	
-                else{
-                 bat "mvn -Dmaven.test.failure.ignore=true clean verify"
-                 }
-                 }
-            }
-            }
-
-        stage ('Docker Build'){
-            steps{
-                script{
-                if(isUnix()){
-                sh "docker build -t nehayadav0/spring-jenkins-ci-cd:latest ."
-				}	
-                else{
-                 bat "docker build -t nehayadav0/spring-jenkins-ci-cd:latest ."
-                 }
-                 }
-
-            }
-            }
-
-        stage ('Docker Push'){
-            steps{
-                withCredentials([usernamePassword(credentialsId:'dockerHub',passwordVariable: 'dockerHubPassword',usernameVariable:'dockerHubUser')]){
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-                sh "docker push nehayadav0/spring-jenkins-ci-cd:latest"
-				}	
-                
-                     
-                 }
-        }
-            
-            
-        
-    post {
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
-                success {
-                    jacoco(
-                    
-                    classPattern: '**/target/classes',
-                    sourcePattern: '**/src/main/groovy'
-                    
-                    )
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts 'target/*.jar'
-                    
+                script {
+                    if (isUnix()) {
+                        sh "mvn -Dmaven.test.failure.ignore=true clean verify"
+                    } else {
+                        bat "mvn -Dmaven.test.failure.ignore=true clean verify"
+                    }
                 }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh "docker build -t nehayadav0/spring-jenkins-ci-cd:latest ."
+                    } else {
+                        bat "docker build -t nehayadav0/spring-jenkins-ci-cd:latest ."
+                    }
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                    script {
+                        if (isUnix()) {
+                            sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+                            sh "docker push nehayadav0/spring-jenkins-ci-cd:latest"
+                        } else {
+                            bat "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+                            bat "docker push nehayadav0/spring-jenkins-ci-cd:latest"
+                        }
+                    }
+                }
+            }
+        }
     }
-}    
-                
-                
-           
-  
 
-
+    post {
+        // If Maven was able to run the tests, even if some of the tests failed, record the test results and archive the jar file.
+        success {
+            jacoco(
+                classPattern: '**/target/classes',
+                sourcePattern: '**/src/main/groovy'
+            )
+            junit '**/target/surefire-reports/TEST-*.xml'
+            archiveArtifacts 'target/*.jar'
+        }
+    }
+}
