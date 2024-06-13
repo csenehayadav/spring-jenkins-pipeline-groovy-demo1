@@ -41,8 +41,24 @@ pipeline {
                  }
                  }
             }
+            }
+
+        stage ('Docker Build'){
+            steps{
+                script{
+                if(isUnix()){
+                sh "docker build -t nehayadav0/spring-jenkins-ci-cd:latest ."
+				}	
+                else{
+                 bat "docker build -t nehayadav0/spring-jenkins-ci-cd:latest ."
+                 }
+                 }
+
+            }
+            }
         
-    	}
+    }
+
     	
     	
     	
