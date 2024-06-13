@@ -28,7 +28,7 @@ pipeline {
             
            
            
-         stage('Integration Test') {
+        stage('Integration Test') {
             steps {
                
                 // Run Maven on a Unix agent.
@@ -61,9 +61,6 @@ pipeline {
 
     	
     	
-    	
-    	
-    }
      post {
                 // If Maven was able to run the tests, even if some of the test
                 // failed, record the test results and archive the jar file.
@@ -80,5 +77,5 @@ pipeline {
                 }
             }
             
-        
-}
+}  
+
