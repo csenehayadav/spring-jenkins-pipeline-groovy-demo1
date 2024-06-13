@@ -63,6 +63,7 @@ pipeline {
                 }
             }
         }
+    }
         stage('Kubernetes Pod') {
 
 steps {
@@ -87,7 +88,7 @@ if (isUnix()){
 sh "kubectl apply -f service.yaml"
 } else {
 bat("kubectl apply -f service.yaml")
-}
+
 }
 }
 
